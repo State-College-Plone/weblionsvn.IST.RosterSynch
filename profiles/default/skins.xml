@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<object name="portal_skins" meta_type="Plone Skins Tool">
+  <object name="rostersynch_templates" meta_type="Filesystem Directory View"
+    directory="RosterSynch/skins/rostersynch_templates" />
+  <object name="rostersynch_scripts"
+    meta_type="Filesystem Directory View"
+    directory="Products.RosterSynch:skins/rostersynch_scripts"/>
+  <object name="rostersynch_styles"
+    meta_type="Filesystem Directory View"
+    directory="Products.RosterSynch:skins/rostersynch_styles"/>
+  <skin-path name="*">
+    <layer name="rostersynch_templates"/>
+	<layer name="rostersynch_scripts"/>
+	<layer name="rostersynch_styles"/>
+    <layer name="rostersynch_external_methods"/>
+  </skin-path>
+</object>

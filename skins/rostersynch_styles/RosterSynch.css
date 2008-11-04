@@ -1,0 +1,77 @@
+/* <dtml-with base_properties> (do not remove this :) */
+/* <dtml-call "REQUEST.set('portal_url', portal_url())"> (not this either :) */
+
+.errorMessage {
+	color: red;
+	font-weight: bold;
+}
+.successMessage {
+	color: green;
+	font-weight: bold;
+}
+.warningMessage {
+	font-weight: bold;
+}
+.errorMessage p {
+	line-height: .5em;
+}
+fieldset {
+	border-color: #666;
+	margin: 0;
+}
+.dataform span.fieldRequired {
+	color: black;
+}
+form.dataform {
+	padding: 0px 10px;
+	width: 800px;
+}
+div.formRow {
+	margin: 10px 0;
+}
+legend {
+	font-size: 1.2em;
+	font-weight: bold;
+}
+.dataform label {
+	width: 15%;
+	margin-right: 10px;
+	float:left;
+}
+.dataform input {
+	width: 30em;
+}
+.dataform .fieldRequired {
+	color: black;
+}
+.dataform .notRequired {
+	padding: 0 8px 0 0;
+}
+.dataform input.context {
+	width: 60px;
+	margin-top: 10px;
+}
+.configInstructions {
+	font-size: .9em;
+	color: green;
+}
+table#roster {
+	margin-left: 25px;
+	width: 300px;
+	border: 0;
+	border-spacing: 0;
+}
+table#roster th {
+	text-align: left;
+	padding: 4px;
+}
+table#roster td {
+	padding: 4px;
+	margin: 0;
+}
+table#roster .striped {
+	background-color: #ccc;
+}
+
+
+/* </dtml-with> */

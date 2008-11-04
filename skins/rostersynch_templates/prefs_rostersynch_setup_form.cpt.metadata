@@ -1,0 +1,13 @@
+[default]
+title=RosterSynch setup
+
+[security]
+View=1:Authenticated
+
+[validators]
+validators=roster_synch_validator
+
+[actions]
+action.success..form_submit=traverse_to:string:prefs_rostersynch_setup
+action.success=redirect_to:string:prefs_rostersynch_setup_form
+action.failure=traverse_to:string:prefs_rostersynch_setup

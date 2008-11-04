@@ -1,0 +1,263 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      lang="en"
+      i18n:domain="rostersynch"
+      metal:use-macro="here/prefs_main_template/macros/master">
+
+<metal:block fill-slot="top_slot"
+             tal:define="dummy python:request.set('disable_border',1)" />
+
+<body>
+
+<div metal:fill-slot="prefs_configlet_main"
+     tal:define="errors python:request.get('controller_state', None).getErrors();">
+
+    <div metal:define-macro="main" i18n:domain="rostersynch">
+    <div class="configlet">
+        <h1 i18n:translate="heading_comments_setup">Roster Synch Setup</h1>
+
+        <a href=""
+           class="link-parent"
+           tal:attributes="href string: $portal_url/plone_control_panel"
+           i18n:translate="label_up_to_plone_setup"
+           i18n:domain="plone">
+           Up to Plone Setup
+        </a>
+		
+		<!-- This tells the user that the changes have been saved -->
+		<p class="errorMessage" tal:define="msg request/portal_status_message|nothing"
+     		tal:condition="msg"
+     		tal:content="msg" />
+		<!-- If something is flagged in validation, we'll save their changes but display 
+		      warnings for any entry that might be suspect -->
+		<span class="errorMessage" tal:define="warning request/portal_warning_message|nothing"
+     		tal:condition="warning"
+     		tal:content="warning">
+		<br />If you are sure your entries is correct, please ignore these warnings.
+		</span>
+		<span tal:define="errs request/errs|nothing"
+     		tal:condition="errs">
+			<ul class="warningMessage">
+				<li tal:condition="exists: python: errs['SectionIDLen']">
+					The Section ID should have 26 characters.<br />Make sure you don't remove any spaces when copying the ID number from ANGEL
+				</li>
+				<li  tal:condition="exists: python: errs['GroupNameSpace']">
+					Please do not include spaces in your group name.
+				</li>
+			</ul>
+         </span>
+         	
+			
+        <form name="edit_form"
+			  class="dataform"
+              action="href"
+              method="post"
+              enctype="multipart/form-data"
+              tal:attributes="action string:${here/getId}/${template/getId}">
+
+            <fieldset tal:define="props_sheet here/portal_properties/RosterSynch">
+    				
+                <legend i18n:translate="legend_setup_options">RosterSynch setup options</legend>
+				<p>For more information, please see the <a href="portal_quickinstaller/prefs_install_product_readme?filereadme=RosterSynch">product documentation</a>.</p>
+                		<span class="fieldRequired">
+			             = Required
+			          	</span>
+					
+					<div class="formRow"
+                     tal:define="property_id string:apiurl;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                    <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           API URL
+                    </label>
+					
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                               id property_id;
+                               value prop_value | nothing;
+                               tabindex tabindex/next;"/>
+                   </div>
+				<div class="formRow"
+                     tal:define="property_id string:apiuser;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                   <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           API Username
+                    </label>
+						
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+
+                </div>
+				 <div class="formRow"
+                     tal:define="property_id string:apipwd;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                   <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           API Password
+                    </label>
+						
+					<input type="password"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+
+                </div>
+				
+				<div class="formRow"
+                     tal:define="property_id string:courseID;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                    <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Section ID
+
+                    </label>
+					
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+							<p class="configInstructions">Find this number in ANGEL <a href="AngelCourseID.jpg" target="_blank">(see screenshot)</a></p>
+                   
+                </div>
+
+                <div class="formRow"
+                     tal:define="property_id string:groupName;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                    <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Group Name
+                    </label>
+					
+                    <input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+						<p class="configInstructions">The name of the group within your groups file.  No spaces, please.</p>
+                </div>
+
+                <div class="formRow"
+                     tal:define="property_id string:groupsFile;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                    <label class="fieldRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Groups File
+                    </label>
+                    
+                    <input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+							<p class="configInstructions">The complete path to your groups file (e.g. /home/zope/mygroups.conf).  
+							<br /><strong>NOTE:</strong> You may have to create this file prior to using RosterSynch and your effective zope user must have permission to write to this file and apache must be able to read it.</p>                   
+                </div>
+                <div class="formRow"
+                     tal:define="property_id string:addUsers;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                   <label class="notRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Additional Users
+                    </label>
+						
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+							<p class="configInstructions">This enables you to grant access to users not in the ANGEL course. <br /><strong>User IDs should be separate by a space.</strong></p>
+
+                </div>
+                <div class="formRow"
+                     tal:define="property_id string:admins;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                   <label class="notRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Admin IDs
+                    </label>
+						
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+							<p class="configInstructions">Users entered here will be added to a group called admins which may be used if you wish to limit access to certain sections of your site. <br /><strong>Users IDs should be spearated by a space.</strong>
+							<br />NOTE:  Just adding users here does not give them any additional rights on the site.  That is handled through your web server configuration.</p>
+
+                </div>
+
+            </fieldset>
+
+            <div class="formControls">
+                <input type="hidden" name="form.submitted" value="1" />
+                <input class="context"
+                       tabindex=""
+                       type="submit"
+                       name="form.button.form_submit"
+                       value="Save"
+                       i18n:attributes="value"
+                       tal:attributes="tabindex tabindex/next;"/>
+            </div>
+			<br />
+			<p><a href="" tal:attributes="href string: $portal_url/RosterSynchForm">To Roster Synch</a></p>
+        </form>
+		
+    </div>
+	
+    </div>
+</div>
+</body>
+</html>

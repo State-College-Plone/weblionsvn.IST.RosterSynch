@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<object name="portal_skins" meta_type="Plone Skins Tool">
+  	<object name="rostersynch_templates" remove="True" />
+  	<object name="rostersynch_scripts" remove="True" /> 
+  	<object name="rostersynch_external_methods" remove="True" />
+	<object name="rostersynch_styles" remove="True" />
+</object>

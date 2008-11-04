@@ -1,0 +1,24 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="RosterSynch">
+    
+    <!-- Allow these profiles to be seen by GenericSetup so I can call setImportContext() on them in Install.py: -->
+    
+    <gs:registerProfile
+        name="default"
+        title="RosterSynch"
+        directory="profiles/default"
+        description="PSU specific product for synchronizing site access with ANGEL."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot" />
+    
+    <gs:registerProfile
+        name="uninstall"
+        title="RosterSynch Uninstall"
+        directory="profiles/uninstall"
+        description="Removes the RosterSynch templates from portal_skins."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot" />
+</configure>

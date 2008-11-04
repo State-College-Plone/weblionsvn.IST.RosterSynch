@@ -1,0 +1,9 @@
+[default]
+title=Control Roster Synch Form
+
+[validators]
+validators=
+
+[actions]
+action.success=traverse_to:string:RosterSynchHandler
+action.failure=traverse_to:string:RosterSynchForm

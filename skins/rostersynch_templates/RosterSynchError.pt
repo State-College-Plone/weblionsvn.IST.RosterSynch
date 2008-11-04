@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="plone">
+<body>
+	
+	<h4 class="errorMessage">Roster Synch Error</h4>	
+	<p><strong>An unexpected error occurred.</strong>  <br />This could mean that:</p>
+	<ol>
+		<li>ANGEL is not responding (it is down for maintenance every morning from 5:00 - 7:00)</li>
+		<li>There are network issues, or</li>
+		<li>Your RosterSynch setup is incorrect.</li>
+	</ol>	
+	<p>Please try again later.  If the problem persists, please contact the site administrator.</p>
+
+</body>
+</html>

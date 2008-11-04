@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      i18n:domain="plone">
+<body>
+
+<metal:main fill-slot="main">
+    <tal:main-macro metal:define-macro="main">
+
+	<h3>Roster Synch Results</h3>
+		<!-- Here's the call that hits the API.  On error, it will display the RosterSynchError template -->				
+		<span tal:define="results python:context.RosterSynch()" tal:on-error="structure context/RosterSynchError">
+		<!-- If the results dictionary is returned, tell 'em the good news and show 'em the roster -->
+		<tal:testForSuccess tal:condition="exists: python:results[0]['userid']">
+			<h4 class="successMessage">Roster Synch Successful!</h4>
+			<table id="roster">
+				<tr>
+					<th>Name</th>
+					<th>User ID</th>
+				</tr>
+					<span tal:repeat="i python:range(len(results))">
+						<span tal:condition="repeat/i/even">
+						<tr>
+							<td><span tal:content="python: results[i]['lname']">[Last Name]</span>, <span tal:content="python: results[i]['fname']">[First Name]</span></td>								
+							<td tal:content="python: results[i]['userid']">[User ID]</td>
+						</tr>
+						</span>
+						<span tal:condition="repeat/i/odd">
+						<tr class="striped">					
+							<td><span tal:content="python: results[i]['lname']">[Last Name]</span>, <span tal:content="python: results[i]['fname']">[First Name]</span></td>								
+							<td tal:content="python: results[i]['userid']">[User ID]</td>
+						</tr>
+						</span>
+					</span>
+			</table>
+		</tal:testForSuccess>
+		<!-- If the results dictionary is not returned, spit out the error message -->
+		<span  tal:condition="not: exists: python:results[0]['userid']">
+		    <h4 class="errorMessage">Roster synch failed</h4>
+		    <p>Error message: <span tal:content="results">[error message here]</span></p>
+		</span>
+	</span> 
+
+    </tal:main-macro>
+</metal:main>
+
+</body>
+</html>
