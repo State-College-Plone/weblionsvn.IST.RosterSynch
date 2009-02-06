@@ -52,7 +52,7 @@
               action="href"
               method="post"
               enctype="multipart/form-data"
-              tal:attributes="action string:${here/getId}/${template/getId}">
+              tal:attributes="action string:${template/getId}">
 
             <fieldset tal:define="props_sheet here/portal_properties/RosterSynch">
     				
