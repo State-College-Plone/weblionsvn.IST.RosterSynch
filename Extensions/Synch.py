@@ -10,7 +10,6 @@ admins = ""
 apiaction =""
 apiuser = ""
 apipwd =""
-
 # hit the api and get the xml object
 def getRoster(courseID, apiurl):
     data = urllib.urlencode({"strcourse_id":courseID,"apiaction":apiaction,"apiuser":apiuser,"apipwd":apipwd})
@@ -24,6 +23,7 @@ def handleRoster(self):
     context = self    
     # create the prop tool to extract values from the site properties
     propTool = getToolByName(context, 'portal_properties')
+    regTool = getToolByName(context,'portal_registration')
     rsProps = propTool['RosterSynch']    
     courseID = rsProps.getProperty('courseID')
     apiurl = rsProps.getProperty('apiurl')
@@ -49,7 +49,7 @@ def handleRoster(self):
         return  errorMessage
     else: 
         members = src.getElementsByTagName("member")
-        roster = handleMembers(members,src)
+        roster = handleMembers(members,src, regTool)
         return roster
 
 # this function extracts and returns the actual text from the xml text node        
@@ -63,7 +63,7 @@ def getText(nodelist):
 #Parse the xml and create a list of user dictionaries with the keys userid, fname and lname 
 # sort the dictionaries by last name
 # while we're at it create a list of users to pass to the writeTheACL function to create the groups file
-def handleMembers(members, src):
+def handleMembers(members, src, regTool):
     person = {}
     userDicts = []
     userList = []
@@ -75,9 +75,10 @@ def handleMembers(members, src):
         person = {"userid":userid,"fname":fname,"lname":lname}
         userList.append(userid)
         userDicts.append(person)
+        createUser(userid, fname, lname, regTool)
         i=i+1
     userDicts = sorted(userDicts, key=itemgetter('lname'))
-    writeTheACL(userList)
+    #writeTheACL(userList)
     return userDicts
 
 # deals with an error message if one is returned from the xml  
@@ -87,6 +88,12 @@ def handleError(messages):
         msg = getText(message.childNodes)
     return msg  
 
+def createUser(userid, fname, lname, regTool):   
+    try:
+        regtool.addMember(userid,'password', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})
+    except:
+        pass
+    
 # opens the "groups" file and replaces its contents with the users returned from handleUserIds       
 def writeTheACL(users):     
     myfile = open(groupsFile, 'w')
