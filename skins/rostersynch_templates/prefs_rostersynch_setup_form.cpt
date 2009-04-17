@@ -150,50 +150,6 @@
                 </div>
 
                 <div class="formRow"
-                     tal:define="property_id string:groupName;
-                                 prop_value python:props_sheet.getProperty(property_id, None);"
-                     tal:condition="python:props_sheet.hasProperty(property_id)">
-
-                    <label class="fieldRequired" i18n:translate="string:${property_id}"
-                           for=""
-                           tal:attributes="for string:${property_id}">
-                           Group Name
-                    </label>
-					
-                    <input type="text"
-                           name=""
-                           id=""
-                           tabindex =""
-                           tal:attributes="name property_id;
-                                           id property_id;
-                                           value prop_value;
-                                           tabindex tabindex/next;"/>
-						<p class="configInstructions">The name of the group within your groups file.  No spaces, please.</p>
-                </div>
-
-                <div class="formRow"
-                     tal:define="property_id string:groupsFile;
-                                 prop_value python:props_sheet.getProperty(property_id, None);"
-                     tal:condition="python:props_sheet.hasProperty(property_id)">
-
-                    <label class="fieldRequired" i18n:translate="string:${property_id}"
-                           for=""
-                           tal:attributes="for string:${property_id}">
-                           Groups File
-                    </label>
-                    
-                    <input type="text"
-                           name=""
-                           id=""
-                           tabindex =""
-                           tal:attributes="name property_id;
-                                           id property_id;
-                                           value prop_value;
-                                           tabindex tabindex/next;"/>
-							<p class="configInstructions">The complete path to your groups file (e.g. /home/zope/mygroups.conf).  
-							<br /><strong>NOTE:</strong> You may have to create this file prior to using RosterSynch and your effective zope user must have permission to write to this file and apache must be able to read it.</p>                   
-                </div>
-                <div class="formRow"
                      tal:define="property_id string:addUsers;
                                  prop_value python:props_sheet.getProperty(property_id, None);"
                      tal:condition="python:props_sheet.hasProperty(property_id)">
@@ -213,29 +169,6 @@
                                            value prop_value;
                                            tabindex tabindex/next;"/>
 							<p class="configInstructions">This enables you to grant access to users not in the ANGEL course. <br /><strong>User IDs should be separate by a space.</strong></p>
-
-                </div>
-                <div class="formRow"
-                     tal:define="property_id string:admins;
-                                 prop_value python:props_sheet.getProperty(property_id, None);"
-                     tal:condition="python:props_sheet.hasProperty(property_id)">
-
-                   <label class="notRequired" i18n:translate="string:${property_id}"
-                           for=""
-                           tal:attributes="for string:${property_id}">
-                           Admin IDs
-                    </label>
-						
-					<input type="text"
-                           name=""
-                           id=""
-                           tabindex =""
-                           tal:attributes="name property_id;
-                                           id property_id;
-                                           value prop_value;
-                                           tabindex tabindex/next;"/>
-							<p class="configInstructions">Users entered here will be added to a group called admins which may be used if you wish to limit access to certain sections of your site. <br /><strong>Users IDs should be spearated by a space.</strong>
-							<br />NOTE:  Just adding users here does not give them any additional rights on the site.  That is handled through your web server configuration.</p>
 
                 </div>
 
