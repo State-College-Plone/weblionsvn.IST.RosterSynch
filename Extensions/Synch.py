@@ -3,11 +3,14 @@ import xml.dom.minidom
 from operator import itemgetter
 from Products.CMFCore.utils import getToolByName
 
-addUsers = []
+addInstructors = []
+addEditors = []
+addStudents = []
 apiaction =""
 apiuser = ""
 apipwd = ""
 courseID = ""
+context = ""
 
 # hit the api and get the xml object
 def getRoster(courseID, apiurl):
@@ -22,13 +25,15 @@ def handleRoster(self):
     context = self    
     # create the prop tool to extract values from the site properties
     propTool = getToolByName(context, 'portal_properties')
-    regTool = getToolByName(context,'portal_registration')
     rsProps = propTool['RosterSynch']    
     courseID = rsProps.getProperty('courseID')
     apiurl = rsProps.getProperty('apiurl')
     #populate the global variables from the site properties
-    global addUsers, apiaction, apiuser, apipwd
-    addUsers = rsProps.getProperty('addUsers')
+    global apiaction, apiuser, apipwd, regTool
+    regTool = getToolByName(context,'portal_registration')
+    addInstructors = rsProps.getProperty('addInstructors')
+    addEditors = rsProps.getProperty('addEditors')
+    addStudents = rsProps.getProperty('addStudents')
     apiaction = rsProps.getProperty('apiaction')
     apiuser = rsProps.getProperty('apiuser')
     apipwd = rsProps.getProperty('apipwd')
@@ -44,8 +49,9 @@ def handleRoster(self):
     if errorMessage != "":
         return  errorMessage
     else: 
+        createAdditionalUsers(addInstructors, addEditors, addStudents, context)
         members = src.getElementsByTagName("member")
-        roster = handleMembers(members, src, regTool, context)
+        roster = handleMembers(members, src, regTool, addInstructors, addEditors, addStudents, context)
         return roster
 
 # this function extracts and returns the actual text from the xml text node        
@@ -59,7 +65,7 @@ def getText(nodelist):
 #Parse the xml and create a list of user dictionaries with the keys userid, fname and lname 
 # sort the dictionaries by last name
 # while we're at it create a list of users to pass to the writeTheACL function to create the groups file
-def handleMembers(members, src, regTool, context):
+def handleMembers(members, src, regTool, addInstructors, addEditors, addStudents, context):
     person = {}
     userDicts = []
     userList = []
@@ -72,11 +78,11 @@ def handleMembers(members, src, regTool, context):
         person = {"userid":userid,"fname":fname,"lname":lname}
         userList.append(userid.encode('ascii','ignore'))
         userDicts.append(person)
-        createUser(userid, fname, lname, rights, regTool)
+        createUser(userid, fname, lname, rights, context)
         i=i+1
     userDicts = sorted(userDicts, key=itemgetter('lname'))
     #writeTheACL(userList)
-    deleteUsers(userList, rights, context)
+    #deleteUsers(userList, rights, context)
     return userDicts
 
 # deals with an error message if one is returned from the xml  
@@ -86,32 +92,44 @@ def handleError(messages):
         msg = getText(message.childNodes)
     return msg  
 
-def createUser(userid, fname, lname, rights, regTool):  
+def createAdditionalUsers(addInstructors, addEditors, addStudents, context):  
+    #import pdb; pdb.set_trace()
+    addInstructors=[addInstructors]
+    addEditors=[addEditors]
+    addStudents=[addStudents]
+    for userid in addInstructors:
+        createUser(userid, '', '', '32', context)
+    for userid in addEditors:
+        createUser(userid, '', '', '16', context)
+    for userid in addStudents:
+        createUser(userid, '', '', '2', context)   
+
+def createUser(userid, fname, lname, rights, context):  
     if rights == '32':
-        role = 'Instructor'
+        groupname = 'Instructors'
     elif rights == '16':
-        role = 'Editor'
+        groupname = 'Course Editors'
     else:
-        role = 'Student'
+        groupname = 'Students'
     try:
-        #import pdb; pdb.set_trace()
-        regTool.addMember(userid,'goober123',(role,), properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})
+        regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
+        group = context.portal_groups.getGroupById(groupname)
+        group.addMember(userid)
     except:
        pass
 
 def deleteUsers(angelUsers, rights, context):
+    if rights == '32':
+        groupname = 'Instructors'
+    elif rights == '16':
+        groupname = 'Course Editors'
+    else:
+        groupname = 'Students'
     mtool = getToolByName(context,'portal_membership')
     siteUsers = context.acl_users.getUserIds()
     for user in siteUsers:
         if user not in angelUsers:
             mtool.deleteMembers(user)
-            
-# opens the "groups" file and replaces its contents with the users returned from handleUserIds       
-def writeTheACL(users):     
-    myfile = open(groupsFile, 'w')
-    if admins != "":
-        aclString = groupName+": " +" ".join(users).lower()+" " + addUsers.lower()+"\nadmins: " +admins
-    else:
-         aclString = groupName+": " +" ".join(users).lower()+" " + addUsers.lower()
-    myfile.write(aclString)
+            group = context.portal_groups.getGroupById(groupname)
+            group.removeMember(user)
    

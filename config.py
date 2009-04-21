@@ -11,6 +11,8 @@ DEFAULT_API = "psu_teamlistxml2"
 PROPERTIES = (('apiaction', DEFAULT_API, 'string'),
               ('apiurl','', 'string'),
               ('courseID', '', 'string'),
-              ('addUsers','','string'),
+              ('addInstructors','','string'),
+              ('addStudents','','string'),
+              ('addEditors','','string'),
               ('apiuser', '', 'string'),
               ('apipwd', '', 'string'))

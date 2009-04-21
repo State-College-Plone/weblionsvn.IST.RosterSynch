@@ -148,16 +148,16 @@
 							<p class="configInstructions">Find this number in ANGEL <a href="AngelCourseID.jpg" target="_blank">(see screenshot)</a></p>
                    
                 </div>
-
+				<p class="configInstructions">Use the fields below to add users who are not in the ANGEL roster.  Separate user IDs with commas.</p>
                 <div class="formRow"
-                     tal:define="property_id string:addUsers;
+                     tal:define="property_id string:addInstructors;
                                  prop_value python:props_sheet.getProperty(property_id, None);"
                      tal:condition="python:props_sheet.hasProperty(property_id)">
 
                    <label class="notRequired" i18n:translate="string:${property_id}"
                            for=""
                            tal:attributes="for string:${property_id}">
-                           Additional Users
+                           Additional Instructors
                     </label>
 						
 					<input type="text"
@@ -168,8 +168,47 @@
                                            id property_id;
                                            value prop_value;
                                            tabindex tabindex/next;"/>
-							<p class="configInstructions">This enables you to grant access to users not in the ANGEL course. <br /><strong>User IDs should be separate by a space.</strong></p>
+                </div>
+				<div class="formRow"
+                     tal:define="property_id string:addEditors;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
 
+                   <label class="notRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Additional Editors
+                    </label>
+						
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
+
+                </div>
+				<div class="formRow"
+                     tal:define="property_id string:addStudents;
+                                 prop_value python:props_sheet.getProperty(property_id, None);"
+                     tal:condition="python:props_sheet.hasProperty(property_id)">
+
+                   <label class="notRequired" i18n:translate="string:${property_id}"
+                           for=""
+                           tal:attributes="for string:${property_id}">
+                           Additional Students
+                    </label>
+						
+					<input type="text"
+                           name=""
+                           id=""
+                           tabindex =""
+                           tal:attributes="name property_id;
+                                           id property_id;
+                                           value prop_value;
+                                           tabindex tabindex/next;"/>
                 </div>
 
             </fieldset>
