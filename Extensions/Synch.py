@@ -3,14 +3,10 @@ import xml.dom.minidom
 from operator import itemgetter
 from Products.CMFCore.utils import getToolByName
 
-addInstructors = []
-addEditors = []
-addStudents = []
 apiaction =""
 apiuser = ""
 apipwd = ""
 courseID = ""
-context = ""
 
 # hit the api and get the xml object
 def getRoster(courseID, apiurl):
@@ -22,14 +18,15 @@ def getRoster(courseID, apiurl):
 
 # the main function that return either the roster as a list of dictionaries or an error message
 def handleRoster(self):
+    #set some global vars that all functions will need
+    global apiaction, apiuser, apipwd, regTool, context
     context = self    
     # create the prop tool to extract values from the site properties
     propTool = getToolByName(context, 'portal_properties')
     rsProps = propTool['RosterSynch']    
     courseID = rsProps.getProperty('courseID')
     apiurl = rsProps.getProperty('apiurl')
-    #populate the global variables from the site properties
-    global apiaction, apiuser, apipwd, regTool
+    #write the site properties to the global variables
     regTool = getToolByName(context,'portal_registration')
     addInstructors = rsProps.getProperty('addInstructors')
     addEditors = rsProps.getProperty('addEditors')
@@ -49,9 +46,10 @@ def handleRoster(self):
     if errorMessage != "":
         return  errorMessage
     else: 
-        createAdditionalUsers(addInstructors, addEditors, addStudents, context)
+        createGroups()
+        createAdditionalUsers(addInstructors, addEditors, addStudents)
         members = src.getElementsByTagName("member")
-        roster = handleMembers(members, src, regTool, addInstructors, addEditors, addStudents, context)
+        roster = handleMembers(members, src, addInstructors, addEditors, addStudents)
         return roster
 
 # this function extracts and returns the actual text from the xml text node        
@@ -64,8 +62,8 @@ def getText(nodelist):
 
 #Parse the xml and create a list of user dictionaries with the keys userid, fname and lname 
 # sort the dictionaries by last name
-# while we're at it create a list of users to pass to the writeTheACL function to create the groups file
-def handleMembers(members, src, regTool, addInstructors, addEditors, addStudents, context):
+# while we're at it create the user if he or she is not already present
+def handleMembers(members, src, addInstructors, addEditors, addStudents):
     person = {}
     userDicts = []
     userList = []
@@ -78,11 +76,10 @@ def handleMembers(members, src, regTool, addInstructors, addEditors, addStudents
         person = {"userid":userid,"fname":fname,"lname":lname}
         userList.append(userid.encode('ascii','ignore'))
         userDicts.append(person)
-        createUser(userid, fname, lname, rights, context)
+        createUser(userid, fname, lname, rights)
         i=i+1
     userDicts = sorted(userDicts, key=itemgetter('lname'))
-    #writeTheACL(userList)
-    #deleteUsers(userList, rights, context)
+    #deleteUsers(userList, rights)
     return userDicts
 
 # deals with an error message if one is returned from the xml  
@@ -92,33 +89,50 @@ def handleError(messages):
         msg = getText(message.childNodes)
     return msg  
 
-def createAdditionalUsers(addInstructors, addEditors, addStudents, context):  
+def createAdditionalUsers(addInstructors, addEditors, addStudents):  
     #import pdb; pdb.set_trace()
-    addInstructors=[addInstructors]
-    addEditors=[addEditors]
-    addStudents=[addStudents]
+    addInstructors=addInstructors.split(',')
+    addEditors=addEditors.split(',')
+    addStudents=addStudents.split(',')
     for userid in addInstructors:
-        createUser(userid, '', '', '32', context)
+        createUser(userid.strip(), '', '', '32')
     for userid in addEditors:
-        createUser(userid, '', '', '16', context)
+        createUser(userid.strip(), '', '', '16')
     for userid in addStudents:
-        createUser(userid, '', '', '2', context)   
+        createUser(userid.strip(), '', '', '2')   
 
-def createUser(userid, fname, lname, rights, context):  
+# creates the user AND puts her in the correct group
+# need to split of group add to another function
+def createUser(userid, fname, lname, rights):     
     if rights == '32':
         groupname = 'Instructors'
     elif rights == '16':
         groupname = 'Course Editors'
     else:
         groupname = 'Students'
+    allUsers = context.acl_users.source_users.getUserNames()
+    groupMembers = context.portal_groups.getGroupMembers(groupname)
     try:
-        regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
-        group = context.portal_groups.getGroupById(groupname)
-        group.addMember(userid)
+        if userid not in allUsers:
+            regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
     except:
-       pass
-
-def deleteUsers(angelUsers, rights, context):
+        pass
+    try:
+        if userid not in groupMembers:
+            group = context.portal_groups.getGroupById(groupname)    
+            group.addMember(userid)
+    except:
+        pass
+    
+def createGroups():
+    if not context.portal_groups.getGroupById('Instructors'):
+        context.portal_groups.addGroup('Instructors',)
+    if not context.portal_groups.getGroupById('Course Editors'):
+        context.portal_groups.addGroup('Course Editors',)
+    if not context.portal_groups.getGroupById('Students'):
+        context.portal_groups.addGroup('Students',)
+                
+def deleteUsers(angelUsers, rights):
     if rights == '32':
         groupname = 'Instructors'
     elif rights == '16':
