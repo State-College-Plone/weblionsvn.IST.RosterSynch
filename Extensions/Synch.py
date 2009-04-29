@@ -46,7 +46,8 @@ def handleRoster(self):
     if apiurl == "" or apiuser == "" or apipwd == "" or courseID == "":
         errorMessage = "Please complete the RosterSynch setup form in Site Setup."
     else:
-        # we've got the values we need, get the roster
+        # we've got the values we need, let's see what the api returned
+        # if an error message, display that.  otherwise get on with it
         src = xml.dom.minidom.parseString(getRoster(courseID, apiurl))
         error = src.getElementsByTagName("error") 
         errorMessage = handleError(error)
@@ -54,9 +55,9 @@ def handleRoster(self):
         return  errorMessage
     else: 
         createGroups()
-        createAdditionalUsers(addInstructors, addEditors, addStudents)
         members = src.getElementsByTagName("member")
         roster = handleMembers(members, src, addInstructors, addEditors, addStudents)
+        createAdditionalUsers(addInstructors, addEditors, addStudents)
         return roster
 
 # this function extracts and returns the actual text from the xml text node        
@@ -81,7 +82,8 @@ def handleMembers(members, src, addInstructors, addEditors, addStudents):
         lname = src.getElementsByTagName("lname")[i].firstChild.data.upper()
         rights = src.getElementsByTagName("course_rights")[i].firstChild.data
         person = {"userid":userid,"fname":fname,"lname":lname}
-        userList.append(userid.encode('ascii','ignore'))
+        userid = userid.encode('ascii','ignore')
+        userList.append(userid)
         userDicts.append(person)
         #create this user
         createUser(userid, fname, lname, rights)
@@ -102,12 +104,11 @@ def handleError(messages):
 def createAdditionalUsers(addInstructors, addEditors, addStudents):  
     #import pdb; pdb.set_trace()
     for userid in addInstructors:
-        userid=userid.strip()
         createUser(userid, '', '', '32')
     for userid in addEditors:
-        createUser(userid.strip(), '', '', '16')
+        createUser(userid, '', '', '16')
     for userid in addStudents:
-        createUser(userid.strip(), '', '', '2')   
+        createUser(userid, '', '', '2')   
 
 # creates the user AND puts her in the correct group
 def createUser(userid, fname, lname, rights):     
@@ -119,7 +120,7 @@ def createUser(userid, fname, lname, rights):
         groupname = 'Students'
     allUsers = context.acl_users.source_users.getUserNames()
     groupMembers = context.portal_groups.getGroupMembers(groupname)
-    if userid not in allUsers:
+    if userid not in allUsers and userid != '':
         regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
     if userid not in groupMembers:
         addUserToGroup(groupname, userid)
