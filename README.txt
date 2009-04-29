@@ -28,7 +28,8 @@ Installation
 	</pre>		
 		Finally, add a line to the products section of your [instance] 
 	
-	<pre>'products =
+	<pre>'[instance] 
+	products =
 	...
 	${buildout:directory}/parts/externals
 	...'
