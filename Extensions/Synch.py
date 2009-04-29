@@ -19,7 +19,7 @@ def getRoster(courseID, apiurl):
 # the main function that return either the roster as a list of dictionaries or an error message
 def handleRoster(self):
     #set some global vars that all functions will need
-    global apiaction, apiuser, apipwd, regTool, context
+    global apiaction, apiuser, apipwd, regTool, addInstructors, addEditors, addStudents, context
     context = self    
     # create the prop tool to extract values from the site properties
     propTool = getToolByName(context, 'portal_properties')
@@ -28,12 +28,19 @@ def handleRoster(self):
     apiurl = rsProps.getProperty('apiurl')
     #write the site properties to the global variables
     regTool = getToolByName(context,'portal_registration')
-    addInstructors = rsProps.getProperty('addInstructors')
-    addEditors = rsProps.getProperty('addEditors')
-    addStudents = rsProps.getProperty('addStudents')
     apiaction = rsProps.getProperty('apiaction')
     apiuser = rsProps.getProperty('apiuser')
     apipwd = rsProps.getProperty('apipwd')
+    # get additional users, strip spaces and turn 'em into lists
+    addInstructors = rsProps.getProperty('addInstructors')
+    addInstructors = addInstructors.replace(' ','')
+    addInstructors=addInstructors.split(',')
+    addEditors = rsProps.getProperty('addEditors')
+    addEditors = addEditors.replace(' ','')
+    addEditors=addEditors.split(',')
+    addStudents = rsProps.getProperty('addStudents')
+    addStudents = addStudents.replace(' ','')
+    addStudents=addStudents.split(',')
     # check for errors from the api and to make sure that the user has completed RosterSynch Setup, if none, get parsing
     errorMessage = ""
     if apiurl == "" or apiuser == "" or apipwd == "" or courseID == "":
@@ -76,10 +83,12 @@ def handleMembers(members, src, addInstructors, addEditors, addStudents):
         person = {"userid":userid,"fname":fname,"lname":lname}
         userList.append(userid.encode('ascii','ignore'))
         userDicts.append(person)
+        #create this user
         createUser(userid, fname, lname, rights)
         i=i+1
     userDicts = sorted(userDicts, key=itemgetter('lname'))
-    #deleteUsers(userList, rights)
+    #delete any users who are not in ANGEL or additional users
+    deleteUsers(userList, addInstructors, addEditors, addStudents)
     return userDicts
 
 # deals with an error message if one is returned from the xml  
@@ -89,20 +98,18 @@ def handleError(messages):
         msg = getText(message.childNodes)
     return msg  
 
+#inserts the users added to the Plone site who are not in ANGEL
 def createAdditionalUsers(addInstructors, addEditors, addStudents):  
     #import pdb; pdb.set_trace()
-    addInstructors=addInstructors.split(',')
-    addEditors=addEditors.split(',')
-    addStudents=addStudents.split(',')
     for userid in addInstructors:
-        createUser(userid.strip(), '', '', '32')
+        userid=userid.strip()
+        createUser(userid, '', '', '32')
     for userid in addEditors:
         createUser(userid.strip(), '', '', '16')
     for userid in addStudents:
         createUser(userid.strip(), '', '', '2')   
 
 # creates the user AND puts her in the correct group
-# need to split of group add to another function
 def createUser(userid, fname, lname, rights):     
     if rights == '32':
         groupname = 'Instructors'
@@ -112,18 +119,24 @@ def createUser(userid, fname, lname, rights):
         groupname = 'Students'
     allUsers = context.acl_users.source_users.getUserNames()
     groupMembers = context.portal_groups.getGroupMembers(groupname)
-    try:
-        if userid not in allUsers:
-            regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
-    except:
-        pass
-    try:
-        if userid not in groupMembers:
-            group = context.portal_groups.getGroupById(groupname)    
-            group.addMember(userid)
-    except:
-        pass
-    
+    if userid not in allUsers:
+        regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
+    if userid not in groupMembers:
+        addUserToGroup(groupname, userid)
+        
+# pretty self-explanatory
+def addUserToGroup(groupname, userid):
+    group = context.portal_groups.getGroupById(groupname)    
+    group.addMember(userid)
+
+# removes a user from all groups (called when a user is deleted  
+def removeUserFromAllGroups(userid):
+    groups=context.portal_groups.getGroupIds()
+    for group in groups:
+        groupname = context.portal_groups.getGroupById(group)
+        groupname.removeMember(userid)
+        
+# create groups if for some reason they don't exist
 def createGroups():
     if not context.portal_groups.getGroupById('Instructors'):
         context.portal_groups.addGroup('Instructors',)
@@ -132,18 +145,18 @@ def createGroups():
     if not context.portal_groups.getGroupById('Students'):
         context.portal_groups.addGroup('Students',)
                 
-def deleteUsers(angelUsers, rights):
-    if rights == '32':
-        groupname = 'Instructors'
-    elif rights == '16':
-        groupname = 'Course Editors'
-    else:
-        groupname = 'Students'
+def deleteUsers(angelUsers, addInstructors, addEditors, addStudents):
+    #create a list of all users to compare with site users
+    #if in site users, but not in the list nuke 'em
+    allUsers = angelUsers
+    allUsers.extend(addInstructors)
+    allUsers.extend(addEditors)
+    allUsers.extend(addStudents)
     mtool = getToolByName(context,'portal_membership')
     siteUsers = context.acl_users.getUserIds()
-    for user in siteUsers:
-        if user not in angelUsers:
-            mtool.deleteMembers(user)
-            group = context.portal_groups.getGroupById(groupname)
-            group.removeMember(user)
+    for userid in siteUsers:
+        if userid not in allUsers:
+            mtool.deleteMembers(userid)
+            removeUserFromAllGroups(userid)
+
    

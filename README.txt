@@ -1,15 +1,42 @@
 RosterSynch is a Penn State specific product designed to enable integrators (or site managers) 
-to control access to their sites.  It is made to work in conjunction with apache in that it creates and 
-manages a groups file that can be used for authorization.  There is no manipulation of apache configuration;
-rather, the product creates a groups file from the class roster (as pulled from the ANGEL course management system) 
-and puts that file in the location of the integrator's choice.  The httpd.conf file must be configured to point to
-this file.  See below for more details.
+to control access to their sites.  It is made to work in conjunction with the PSU ANGEL API.  The developer must set up
+access to this API prior to using RosterSynch.
 
 Installation
 
  	In old-school Plone style, copy the RosterSynch folder to your products directory and restart your zope instance.
 	Install the product in your Plone site through the Add-On Products control panel (or via the ZMI portal quick installer).
+	
+	**With Buildout**
+	
+	If you use buildout, you can use the infrae.subversion recipe to pull this directly from the WebLion repository.  See the following
+	example.
+	
+	In buildout.cfg:
+	Add a line to your [buildout] parts section.  You can call it whatever you like (I call mine externals in this example).
+	<pre>'[buildout]
+	parts =
+	...
+	externals
+	...'
+	</pre>
+		Then add the externals section:
+			
+	<pre>'[externals]
+	recipe = infrae.subversion
+	urls =	https://weblion.psu.edu/svn/weblion/collegeOfIst/RosterSynch RosterSynch'
+	</pre>		
+		Finally, add a line to the products section of your [instance] 
+	
+	<pre>'products =
+	...
+	${buildout:directory}/parts/externals
+	...'
+	</pre>
 
+    
+    Re-run buildout and it should pull this new product.
+    Install the product in your Plone site through the Add-On Products control panel (or via the ZMI portal quick installer).
 
 Configuration
 
@@ -21,50 +48,39 @@ Configuration
 	
 	Setup Options:
 	
-		1.  **API URL** - Required.  This tells RosterSynch where to find the roster.  Some servers will have access to the production api and
+		**_Required Fields_**
+	
+		*  **API URL** - Required.  This tells RosterSynch where to find the roster.  Some servers will have access to the production api and
 		some the development api.  You also may want to just point this to a test file while you are experimenting with the product.  This property 
 		allows you to change that without editing the python script.
 		
-		2.  **API Username** - Required.  Get this from the ANGEL team.
+		*  **API Username** - Required.  Get this from the ANGEL team.
 		
-		3.  **API Password** - Required.  Get this from the ANGEL team.
+		*  **API Password** - Required.  Get this from the ANGEL team.
 		
-		4.  **Section ID** -  Required.  This number is found in ANGEL.  See the screenshot link on the setup page to see where you find this number.
+		*  **Section ID** -  Required.  This number is found in ANGEL.  See the screenshot link on the setup page to see where you find this number.
 		The format of this ID is very important (including the spaces), so don't edit it.
 		
-		5.  **Group Name** -  Required.  This is the name of the group that is written into the groups file and that apache will use for authorization.  
-		It will appear in the file like this:  mygroup: [followed by a space-delimited list of users].  You should use no spaces in this value.
-	
-		6.  **Groups File** -  Required.  This is the complete path to the location of your groups file.  For example: /home/zope/sra211.conf.  Depending on how you 
-		have your permissions set, you may have to create the file before RosterSynch will work.  You effective zope user has to have write permission 
-		to this file and apache has to be able to read it.
+		**_Optional Fields_**
 		
-		7.  **Additional Users** -  Optional.  If you wish to grant access to other users who are not in the ANGEL course, add them here.
-		This should be a space-delimited list of any users you wish to add.  If you wish to remove those users, remove them from this 
-		list and re-run RosterSynch. 
+		Use the following fields to grant access to users who are not in the ANGEL Roster.
 		
-		8.  **Admin ID** - Optional.  If you add users here, RosterSynch will create another group called admins and add these users.
-		This, by itself, does nothing to grant any special privileges; that is handled through the apache configuration.  This just gives you 
-		the flexibility of having another group to work with.  If, for example, you wish to limit access to one section of your site,
-		you can require group admins.
+		**NOTE:  All additional users should be added here instead of through the standard Plone User Management tool.  Only users here
+		and in the ANGEL roster are respected when RosterSynch is run.  If users are not listed in one of these two places, they will be removed from the
+		the Plone users and groups.**
 		
-A (very) little about apache configuration
+		To add users to your site, add them to the appropriate group below.  To remove users from your site, remove them from the groups below or remove
+		then from your course in ANGEL.
+		
+		*  **Additional Instructors** -  Optional.  If you add users here, RosterSynch will create that user and add him or her to the Instructors group.  
+		If you wish to remove those users, remove them from this list and re-run RosterSynch. 
+		
+		*  **Addtional Course Editors** - Optional.  If you add users here, RosterSynch will create that user and add him or her to the Course Editors group.  
+		If you wish to remove those users, remove them from this list and re-run RosterSynch.
 
-	The RosterSynch product is designed to work in conjunction with the apache web server and PSU Web Access (CoSign) authorization.
-	Apache configuration is an extensive topic and way outside of the scope of this documentation, but here is a quick explanation of how 
-	you might apply the groups file.
-	
-	The directory (or site) that is secured with CoSign would have a Location block in the httpd.conf file that looks something like this::
+		*  **Addtional Course Editors** - Optional.  If you add users here, RosterSynch will create that user and add him or her to the Students group.  
+		If you wish to remove those users, remove them from this list and re-run RosterSynch.
 		
-		<Location /mysite>
-			AuthType Cosign
-			AuthGroupFile /home/zope/myGroupsFile.conf
-			Require group mygroup admins
-			...
-		</Location>
-		
-	More information about configuring CoSign, apache and your zope instance is available from the "PSU WebLion":http://weblion.psu.edu team.
-   
 
 To Do List
 	
@@ -80,7 +96,7 @@ Credits and Contact
 	their help and patience in answering questions.  To the degree that this product is useful, credit goes to those parties.
 	 
 	On the other hand, problems, bugs and other issues are the fault of Joe DeLuca, who did most of the work on this project.  If you find issues, please contact
-	him at joedeluca at psu dot edu.  He would also like to hear your comments and suggestions for improvements for future versions.
+	him at jdeluca at psu dot edu.  He would also like to hear your comments and suggestions for improvements for future versions.
 
 
 License
