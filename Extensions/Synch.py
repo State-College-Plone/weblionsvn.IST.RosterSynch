@@ -3,13 +3,8 @@ import xml.dom.minidom
 from operator import itemgetter
 from Products.CMFCore.utils import getToolByName
 
-apiaction =""
-apiuser = ""
-apipwd = ""
-courseID = ""
-
 # hit the api and get the xml object
-def getRoster(courseID, apiurl):
+def getRoster(courseID, apiurl, apiaction, apiuser, apipwd):
     data = urllib.urlencode({"strcourse_id":courseID,"apiaction":apiaction,"apiuser":apiuser,"apipwd":apipwd})
     f = urllib.urlopen(apiurl, data)   
     thexml = f.read()
@@ -18,8 +13,9 @@ def getRoster(courseID, apiurl):
 
 # the main function that return either the roster as a list of dictionaries or an error message
 def handleRoster(self):
+    """Return a dictionary of course roster as found in ANGEL"""
     #set some global vars that all functions will need
-    global apiaction, apiuser, apipwd, regTool, addInstructors, addEditors, addStudents, context
+    global regTool, addInstructors, addEditors, addStudents, context
     context = self    
     # create the prop tool to extract values from the site properties
     propTool = getToolByName(context, 'portal_properties')
@@ -48,7 +44,7 @@ def handleRoster(self):
     else:
         # we've got the values we need, let's see what the api returned
         # if an error message, display that.  otherwise get on with it
-        src = xml.dom.minidom.parseString(getRoster(courseID, apiurl))
+        src = xml.dom.minidom.parseString(getRoster(courseID, apiurl, apiaction, apiuser, apipwd))
         error = src.getElementsByTagName("error") 
         errorMessage = handleError(error)
     if errorMessage != "":
@@ -72,22 +68,22 @@ def getText(nodelist):
 # sort the dictionaries by last name
 # while we're at it create the user if he or she is not already present
 def handleMembers(members, src, addInstructors, addEditors, addStudents):
+    """Create a dictionary of users found in the ANGEL roster."""
     person = {}
     userDicts = []
     userList = []
-    i = 0
     for member in members:
-        userid = src.getElementsByTagName("user_id")[i].firstChild.data.lower()
-        fname = src.getElementsByTagName("fname")[i].firstChild.data.upper()
-        lname = src.getElementsByTagName("lname")[i].firstChild.data.upper()
-        rights = src.getElementsByTagName("course_rights")[i].firstChild.data
+        #import pdb; pdb.set_trace()
+        userid = member.getElementsByTagName("user_id")[0].firstChild.data.lower()
+        fname = member.getElementsByTagName("fname")[0].firstChild.data.upper()
+        lname = member.getElementsByTagName("lname")[0].firstChild.data.upper()
+        rights = member.getElementsByTagName("course_rights")[0].firstChild.data
         person = {"userid":userid,"fname":fname,"lname":lname}
         userid = userid.encode('ascii','ignore')
         userList.append(userid)
         userDicts.append(person)
         #create this user
         createUser(userid, fname, lname, rights)
-        i=i+1
     userDicts = sorted(userDicts, key=itemgetter('lname'))
     #delete any users who are not in ANGEL or additional users
     deleteUsers(userList, addInstructors, addEditors, addStudents)
@@ -102,6 +98,7 @@ def handleError(messages):
 
 #inserts the users added to the Plone site who are not in ANGEL
 def createAdditionalUsers(addInstructors, addEditors, addStudents):  
+    """Create users that are added to the roster via Plone configlet."""
     #import pdb; pdb.set_trace()
     for userid in addInstructors:
         createUser(userid, '', '', '32')
@@ -110,8 +107,8 @@ def createAdditionalUsers(addInstructors, addEditors, addStudents):
     for userid in addStudents:
         createUser(userid, '', '', '2')   
 
-# creates the user AND puts her in the correct group
-def createUser(userid, fname, lname, rights):     
+def createUser(userid, fname, lname, rights):  
+    """Create users and put them in the appropriate groups."""   
     if rights == '32':
         groupname = 'Instructors'
     elif rights == '16':
@@ -125,13 +122,13 @@ def createUser(userid, fname, lname, rights):
     if userid not in groupMembers:
         addUserToGroup(groupname, userid)
         
-# pretty self-explanatory
 def addUserToGroup(groupname, userid):
     group = context.portal_groups.getGroupById(groupname)    
     group.addMember(userid)
 
-# removes a user from all groups (called when a user is deleted  
+# removes a user from all groups (called when a user is deleted)
 def removeUserFromAllGroups(userid):
+    """Remove a user from all groups (called when a user is deleted)"""
     groups=context.portal_groups.getGroupIds()
     for group in groups:
         groupname = context.portal_groups.getGroupById(group)
