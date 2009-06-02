@@ -22,7 +22,6 @@ def handleRoster(self):
     rsProps = propTool['RosterSynch']    
     courseID = rsProps.getProperty('courseID')
     apiurl = rsProps.getProperty('apiurl')
-    #write the site properties to the global variables
     regTool = getToolByName(context,'portal_registration')
     apiaction = rsProps.getProperty('apiaction')
     apiuser = rsProps.getProperty('apiuser')
@@ -30,7 +29,7 @@ def handleRoster(self):
     # get additional users, strip spaces and turn 'em into lists
     addInstructors = rsProps.getProperty('addInstructors')
     addInstructors = addInstructors.replace(' ','')
-    addInstructors=addInstructors.split(',')
+    addInstructors = addInstructors.split(',')
     addEditors = rsProps.getProperty('addEditors')
     addEditors = addEditors.replace(' ','')
     addEditors=addEditors.split(',')
@@ -113,14 +112,14 @@ def createUser(userid, fname, lname, rights, regTool, context):
     if rights == '32':
         groupname = 'Instructors'
     elif rights == '16':
-        groupname = 'Course Editors'
+        groupname = 'CourseEditors'
     else:
         groupname = 'Students'
     allUsers = context.acl_users.source_users.getUserNames()
     groupMembers = context.portal_groups.getGroupMembers(groupname)
-    if userid not in allUsers and userid != '':
+    if userid not in allUsers and userid != '' and userid != None:
         regTool.addMember(userid,'goober123','', properties={'username':userid,'email':userid+'@psu.edu','fullname': fname +' '+lname})    
-    if userid not in groupMembers:
+    if userid not in groupMembers and userid != None:
         addUserToGroup(groupname, userid, context)
         
 def addUserToGroup(groupname, userid, context):
@@ -140,8 +139,8 @@ def createGroups(context):
     """Create groups required by the ANGEL API"""
     if not context.portal_groups.getGroupById('Instructors'):
         context.portal_groups.addGroup('Instructors',)
-    if not context.portal_groups.getGroupById('Course Editors'):
-        context.portal_groups.addGroup('Course Editors',)
+    if not context.portal_groups.getGroupById('CourseEditors'):
+        context.portal_groups.addGroup('CourseEditors',properties={'title':'Course Editors'})
     if not context.portal_groups.getGroupById('Students'):
         context.portal_groups.addGroup('Students',)
                 

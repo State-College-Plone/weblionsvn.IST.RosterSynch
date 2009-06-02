@@ -5,8 +5,7 @@ from Products.CMFCore.utils import getToolByName
 PloneTestCase.installProduct('RosterSynch')
 PloneTestCase.setupPloneSite(products=['RosterSynch'])
 
-_layerNames = {'rostersynch_portlets': ['portlet_custom_navigation_example'],
-               'rostersynch_external_methods': ['customNavtree']}  # layer names pointing to the contents of their folders in portal_skins
+_layerNames = {'rostersynch_external_methods': ['RosterSynch']}  # layer names pointing to the contents of their folders in portal_skins
 
 
 class InstallTestCase(PloneTestCase.PloneTestCase):
@@ -23,7 +22,7 @@ class InstallTestCase(PloneTestCase.PloneTestCase):
 
 class TestInstall(InstallTestCase):
     def testPortalSkinsContents(self):
-        """Make sure rostersynch_portlets, portlet_custom_navigation_example, etc. got into portal_skins."""
+        """Make sure rostersynch stuff etc. got into portal_skins."""
         for curLayer, curContents in _layerNames.iteritems():
             for curContainedItem in curContents:
                 try:
