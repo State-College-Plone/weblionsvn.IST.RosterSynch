@@ -81,7 +81,6 @@ def handleMembers(members, src, addInstructors, addEditors, addStudents,regTool,
         userid = userid.encode('ascii','ignore')
         userList.append(userid)
         userDicts.append(person)
-        #create this user
         createUser(userid, fname, lname, rights, regTool, context)
     userDicts = sorted(userDicts, key=itemgetter('lname'))
     #delete any users who are not in ANGEL or additional users
@@ -140,12 +139,13 @@ def createGroups(context):
     if not context.portal_groups.getGroupById('Instructors'):
         context.portal_groups.addGroup('Instructors',)
     if not context.portal_groups.getGroupById('CourseEditors'):
-        context.portal_groups.addGroup('CourseEditors',properties={'title':'Course Editors'})
+        context.portal_groups.addGroup('CourseEditors')
+        #context.acl_users.source_groups.manage_addGroup('CourseEditors','Course Editors')
     if not context.portal_groups.getGroupById('Students'):
         context.portal_groups.addGroup('Students',)
                 
 def deleteUsers(angelUsers, addInstructors, addEditors, addStudents, context):
-    """Remove users who are not in the ANGEL API or explicitley added by the portal roster synch properties."""
+    """Remove users who are not in the ANGEL API or explicitely added by the portal roster synch properties."""
     #create a list of all users to compare with site users
     #if in site users, but not in the list nuke 'em
     allUsers = angelUsers

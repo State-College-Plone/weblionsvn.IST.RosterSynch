@@ -12,6 +12,7 @@
 		<li>ANGEL is not responding (it is down for maintenance every morning from 5:00 - 7:00)</li>
 		<li>There are network issues, or</li>
 		<li>Your RosterSynch setup is incorrect.</li>
+		<li>The result returned from the API is not formatted correctly.</li>
 	</ol>	
 	<p>Please try again later.  If the problem persists, please contact the site administrator.</p>
 

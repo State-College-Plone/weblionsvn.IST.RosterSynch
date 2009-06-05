@@ -18,7 +18,7 @@
 			<span class="errorMessage" tal:define="errors options/state/getErrors">
 				<p tal:define="err errors/courseID|nothing" tal:condition="err" tal:content="err"></p>
 			</span>
-			<!-- A brief introduction to the RosterSynch tool -->
+
 			<form name="createUserForm" class="rsform"  
 				tal:attributes="action python:here.absolute_url()+'/'+template.id" method="post">
 					<p><strong>Make sure you have set up your RosterSynch preferences in the Site Setup section</strong> (<a href="prefs_rostersynch_setup_form">RosterSynch Setup</a>).</p>

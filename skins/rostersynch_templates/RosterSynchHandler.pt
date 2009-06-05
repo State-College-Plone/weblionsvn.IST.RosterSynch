@@ -12,7 +12,7 @@
 
 	<h3>Roster Synch Results</h3>
 		<!-- Here's the call that hits the API.  On error, it will display the RosterSynchError template tal:on-error="structure context/RosterSynchError" -->				
-		<span tal:define="results python:context.RosterSynch()" >
+		<span tal:define="results python:context.RosterSynch()" tal:on-error="structure context/RosterSynchError">
 		<!-- If the results dictionary is returned, tell 'em the good news and show 'em the roster -->
 		<tal:testForSuccess tal:condition="exists: python:results[0]['userid']">
 			<h4 class="successMessage">Roster Synch Successful!</h4>

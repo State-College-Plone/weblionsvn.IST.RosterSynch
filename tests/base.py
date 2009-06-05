@@ -14,7 +14,7 @@ def setup_RosterSynch():
     until the setup of the Plone site testing layer.
     """
     
-    # Load the ZCML configuration for the optilux.policy package.
+    # Load the ZCML configuration for the RosterSynch package.
     
     fiveconfigure.debug_mode = True
     import Products.RosterSynch
@@ -28,7 +28,7 @@ def setup_RosterSynch():
     ztc.installPackage('RosterSynch')
     
 # The order here is important: We first call the (deferred) function which
-# installs the products we need for the Optilux package. Then, we let 
+# installs the products we need for the RosterSynch package. Then, we let 
 # PloneTestCase set up this product on installation.
 
 setup_RosterSynch()
